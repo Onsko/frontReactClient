@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { createContext } from "react";
 import axios from "axios"; 
 import { toast } from "react-toastify"; 
+import { useNavigate } from "react-router-dom";
 export const AppContent = createContext();
 
 export const AppContextProvider = (props) => {
   axios.defaults.withCredentials=true;
-
+const navigate = useNavigate()
 
   const backendUrl =import.meta.env.VITE_BACKEND_URL
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,6 +28,7 @@ export const AppContextProvider = (props) => {
 const getUserData = async () => {
     try {
       const { data } = await axios.get(backendUrl + "/api/user/data");
+      navigate('/admin')
       data.success ? setUserData(data.userData) : toast.error(data.message);
     } catch (error) {
       toast.error(error.message);
