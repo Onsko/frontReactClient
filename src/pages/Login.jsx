@@ -1,20 +1,18 @@
 import React, { useContext, useState } from 'react';
-import { assets } from '../assets/assets';
 import { useNavigate } from 'react-router-dom';
-import { AppContent } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AppContent } from '../context/AppContext';
+import { assets } from '../assets/assets';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { backendUrl, setIsLoggedIn, setUserData,getUserData } = useContext(AppContent);
+  const { backendUrl, setIsLoggedIn, setUserData } = useContext(AppContent);
 
-  const [state, setState] = useState('Sign Up');
+  const [state, setState] = useState('Sign Up'); // ou 'Login'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
- 
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -22,29 +20,47 @@ const Login = () => {
 
     try {
       if (state === 'Sign Up') {
-        const { data } = await axios.post(backendUrl + '/api/auth/register', { name, email, password });
+        const { data } = await axios.post(backendUrl + '/api/auth/register', {
+          name,
+          email,
+          password,
+        });
+
         if (data.success) {
           setIsLoggedIn(true);
-          await getUserData();
+          setUserData(data.user);
+          toast.success('Compte créé avec succès !');
           navigate('/');
         } else {
           toast.error(data.message);
         }
       } else {
-        const { data } = await axios.post(backendUrl + '/api/auth/login', { email, password });
+        const { data } = await axios.post(backendUrl + '/api/auth/login', {
+          email,
+          password,
+        });
         if (data.success) {
           setIsLoggedIn(true);
-          await getUserData();
-          navigate('/');
+          setUserData(data.user);
+          toast.success('Connexion réussie !');
+
+          console.log('Rôle utilisateur :', data.user.role);
+
+          if (data.user.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         } else {
           toast.error(data.message);
         }
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      console.error('Erreur lors de la soumission :', error);
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error("Une erreur inconnue est survenue.");
+        toast.error('Une erreur inconnue est survenue.');
       }
     }
   };
