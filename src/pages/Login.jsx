@@ -9,43 +9,42 @@ const Login = () => {
   const navigate = useNavigate();
   const { backendUrl, setIsLoggedIn, setUserData } = useContext(AppContent);
 
-  const [state, setState] = useState('Login'); // 'Login' ou 'Sign Up'
+  const [state, setState] = useState('Login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-const onSubmitHandler = async (e) => {
-  e.preventDefault();
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
 
-  try {
-    const { data } = await axios.post(`${backendUrl}/api/auth/login`, { email, password }, { withCredentials: true });
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/auth/login`, { email, password }, { withCredentials: true });
 
-    if (data.success) {
-      // Après login, on récupère les infos user
-      const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
-      if (resUser.data.success) {
-        setUserData(resUser.data.userData);
-        setIsLoggedIn(true);
+      if (data.success) {
+        const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
 
-        if (resUser.data.userData.role === "admin") {
-          navigate("/admin");
+        if (resUser.data.success) {
+          setUserData(resUser.data.userData);
+          setIsLoggedIn(true);
+
+          toast.success("Connexion réussie");
+
+          // ✅ Redirection selon le rôle
+          if (resUser.data.userData.role === "admin") {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
         } else {
-          navigate("/");
+          toast.error("Impossible de récupérer les infos utilisateur");
         }
-        toast.success("Connexion réussie");
       } else {
-        toast.error("Impossible de récupérer les infos utilisateur");
+        toast.error("Erreur lors de la connexion");
       }
-    } else {
-      toast.error("Erreur lors de la connexion");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-  }
-};
-
-
-
+  };
 
   return (
     <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
@@ -56,8 +55,12 @@ const onSubmitHandler = async (e) => {
         alt="logo"
       />
       <div className='bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm'>
-        <h2 className='text-3xl font-semibold text-white text-center mb-3'>{state === 'Sign Up' ? 'Create Account' : 'Login'}</h2>
-        <p className='text-center text-sm mb-6'>{state === 'Sign Up' ? 'Create your account' : 'Login to your account'}</p>
+        <h2 className='text-3xl font-semibold text-white text-center mb-3'>
+          {state === 'Sign Up' ? 'Create Account' : 'Login'}
+        </h2>
+        <p className='text-center text-sm mb-6'>
+          {state === 'Sign Up' ? 'Create your account' : 'Login to your account'}
+        </p>
 
         <form onSubmit={onSubmitHandler}>
           {state === 'Sign Up' && (
@@ -98,7 +101,9 @@ const onSubmitHandler = async (e) => {
             />
           </div>
 
-          <p onClick={() => navigate('/reset-password')} className='mb-4 text-indigo-500 cursor-pointer'>Forgot password?</p>
+          <p onClick={() => navigate('/reset-password')} className='mb-4 text-indigo-500 cursor-pointer'>
+            Forgot password?
+          </p>
 
           <button className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 hover:from-indigo-900 hover:to-indigo-500 font-semibold text-white text-lg'>
             {state === 'Sign Up' ? 'Create Account' : 'Login'}
