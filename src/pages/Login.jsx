@@ -9,65 +9,52 @@ const Login = () => {
   const navigate = useNavigate();
   const { backendUrl, setIsLoggedIn, setUserData } = useContext(AppContent);
 
-  const [state, setState] = useState('Sign Up'); // ou 'Login'
+  const [state, setState] = useState('Login'); // 'Login' ou 'Sign Up'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    axios.defaults.withCredentials = true;
+const onSubmitHandler = async (e) => {
+  e.preventDefault();
 
-    try {
-      if (state === 'Sign Up') {
-        const { data } = await axios.post(backendUrl + '/api/auth/register', {
-          name,
-          email,
-          password,
-        });
+  try {
+    const { data } = await axios.post(`${backendUrl}/api/auth/login`, { email, password }, { withCredentials: true });
 
-        if (data.success) {
-          setIsLoggedIn(true);
-          setUserData(data.user);
-          toast.success('Compte créé avec succès !');
-          navigate('/');
+    if (data.success) {
+      // Après login, on récupère les infos user
+      const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+      if (resUser.data.success) {
+        setUserData(resUser.data.userData);
+        setIsLoggedIn(true);
+
+        if (resUser.data.userData.role === "admin") {
+          navigate("/admin");
         } else {
-          toast.error(data.message);
+          navigate("/");
         }
+        toast.success("Connexion réussie");
       } else {
-        const { data } = await axios.post(backendUrl + '/api/auth/login', {
-          email,
-          password,
-        });
-        if (data.success) {
-          setIsLoggedIn(true);
-          setUserData(data.user);
-          toast.success('Connexion réussie !');
-
-          console.log('Rôle utilisateur :', data.user.role);
-
-          if (data.user.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/');
-          }
-        } else {
-          toast.error(data.message);
-        }
+        toast.error("Impossible de récupérer les infos utilisateur");
       }
-    } catch (error) {
-      console.error('Erreur lors de la soumission :', error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Une erreur inconnue est survenue.');
-      }
+    } else {
+      toast.error("Erreur lors de la connexion");
     }
-  };
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message);
+  }
+};
+
+
+
 
   return (
     <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
-      <img onClick={() => navigate('/')} className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer' src={assets.logo} alt="logo" />
+      <img
+        onClick={() => navigate('/')}
+        className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'
+        src={assets.logo}
+        alt="logo"
+      />
       <div className='bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm'>
         <h2 className='text-3xl font-semibold text-white text-center mb-3'>{state === 'Sign Up' ? 'Create Account' : 'Login'}</h2>
         <p className='text-center text-sm mb-6'>{state === 'Sign Up' ? 'Create your account' : 'Login to your account'}</p>
@@ -76,37 +63,53 @@ const Login = () => {
           {state === 'Sign Up' && (
             <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
               <img src={assets.person_icon} alt="user" />
-              <input onChange={e => setName(e.target.value)} value={name} className='text-slate-300 bg-transparent outline-none' type="text" placeholder='Full Name' required />
+              <input
+                onChange={e => setName(e.target.value)}
+                value={name}
+                className='text-slate-300 bg-transparent outline-none'
+                type="text"
+                placeholder='Full Name'
+                required
+              />
             </div>
           )}
 
           <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
             <img src={assets.mail_icon} alt="mail" />
-            <input onChange={e => setEmail(e.target.value)} value={email} className='text-slate-300 bg-transparent outline-none' type="email" placeholder='Email' required />
+            <input
+              onChange={e => setEmail(e.target.value)}
+              value={email}
+              className='text-slate-300 bg-transparent outline-none'
+              type="email"
+              placeholder='Email'
+              required
+            />
           </div>
 
           <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
             <img src={assets.lock_icon} alt="lock" />
-            <input onChange={e => setPassword(e.target.value)} value={password} className='text-slate-300 bg-transparent outline-none' type="password" placeholder='Password' required />
+            <input
+              onChange={e => setPassword(e.target.value)}
+              value={password}
+              className='text-slate-300 bg-transparent outline-none'
+              type="password"
+              placeholder='Password'
+              required
+            />
           </div>
 
           <p onClick={() => navigate('/reset-password')} className='mb-4 text-indigo-500 cursor-pointer'>Forgot password?</p>
 
-          <button className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer'>{state}</button>
+          <button className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 hover:from-indigo-900 hover:to-indigo-500 font-semibold text-white text-lg'>
+            {state === 'Sign Up' ? 'Create Account' : 'Login'}
+          </button>
         </form>
 
-        <p className='text-gray-400 text-center text-xs mt-4'>
-          {state === 'Sign Up' ? (
-            <>
-              Already have an account?{' '}
-              <span onClick={() => setState('Login')} className='text-blue-400 cursor-pointer underline'>Login here</span>
-            </>
-          ) : (
-            <>
-              Don’t have an account?{' '}
-              <span onClick={() => setState('Sign Up')} className='text-blue-400 cursor-pointer underline'>Sign up</span>
-            </>
-          )}
+        <p
+          onClick={() => setState(state === 'Login' ? 'Sign Up' : 'Login')}
+          className='mt-4 text-center cursor-pointer text-indigo-500 hover:text-indigo-300'
+        >
+          {state === 'Login' ? 'Create a new account?' : 'Already have an account? Login'}
         </p>
       </div>
     </div>
