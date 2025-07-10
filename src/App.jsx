@@ -9,38 +9,28 @@ import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import axios from 'axios';
 
-// Composant pour protéger une route selon rôle
-const PrivateRoute = ({ children, allowedRoles }) => {
-  const { userData, isLoggedIn } = useContext(AppContent);
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(userData?.role)) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
-
 const App = () => {
-  const { backendUrl, setIsLoggedIn, setUserData } = useContext(AppContent);
+  const { backendUrl, setIsLoggedIn, setUserData, userData, isLoggedIn } = useContext(AppContent);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        console.log('[App] Début fetchUserData...');
         const res = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+        console.log('[App] Réponse user data:', res.data);
+
         if (res.data.success) {
-          setUserData(res.data.userData);
+          setUserData(res.data.user);
           setIsLoggedIn(true);
+          console.log('[App] User set:', res.data.user);
         } else {
           setIsLoggedIn(false);
           setUserData(null);
+          console.log('[App] Pas de user connecté');
         }
       } catch (err) {
-        console.error("Erreur récupération des données utilisateur :", err.message);
+        console.log('[App] Erreur fetchUserData:', err.message);
         setIsLoggedIn(false);
         setUserData(null);
       } finally {
@@ -63,14 +53,8 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/email-verify' element={<EmailVerify />} />
         <Route path='/reset-password' element={<ResetPassword />} />
-        <Route
-          path='/admin'
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          }
-        />
+        {/* Route admin SANS protection */}
+        <Route path='/admin' element={<AdminDashboard />} />
       </Routes>
     </div>
   );

@@ -10,38 +10,49 @@ const Login = () => {
   const { backendUrl, setIsLoggedIn, setUserData } = useContext(AppContent);
 
   const [state, setState] = useState('Login');
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-
     try {
-      const { data } = await axios.post(`${backendUrl}/api/auth/login`, { email, password }, { withCredentials: true });
+      console.log('[Login] Tentative de connexion avec:', email);
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/login`,
+        { email, password },
+        { withCredentials: true }
+      );
+      console.log('[Login] Réponse login:', data);
 
       if (data.success) {
         const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+        console.log('[Login] User data reçue:', resUser.data);
 
-        if (resUser.data.success) {
-          setUserData(resUser.data.userData);
-          setIsLoggedIn(true);
+      if (resUser.data.success) {
+  const user = resUser.data.userData;
+  setUserData(user);
+  setIsLoggedIn(true);
 
-          toast.success("Connexion réussie");
+  console.log('[Login] Objet user:', user);
 
-          // ✅ Redirection selon le rôle
-          if (resUser.data.userData.role === "admin") {
-            navigate("/admin");
-          } else {
-            navigate("/");
-          }
-        } else {
-          toast.error("Impossible de récupérer les infos utilisateur");
-        }
+  if (user.role === "admin") {
+    console.log('[Login] Connexion admin détectée, redirection vers /admin');
+    navigate("/admin");
+  } else {
+    console.log('[Login] Connexion user normale, redirection vers /');
+    navigate("/");
+  }
+
+  toast.success("Connexion réussie");
+} else {
+  toast.error("Impossible de récupérer les infos utilisateur");
+}
+
       } else {
         toast.error("Erreur lors de la connexion");
       }
     } catch (error) {
+      console.log('[Login] Erreur login:', error);
       toast.error(error.response?.data?.message || error.message);
     }
   };
@@ -63,22 +74,7 @@ const Login = () => {
         </p>
 
         <form onSubmit={onSubmitHandler}>
-          {state === 'Sign Up' && (
-            <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
-              <img src={assets.person_icon} alt="user" />
-              <input
-                onChange={e => setName(e.target.value)}
-                value={name}
-                className='text-slate-300 bg-transparent outline-none'
-                type="text"
-                placeholder='Full Name'
-                required
-              />
-            </div>
-          )}
-
           <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
-            <img src={assets.mail_icon} alt="mail" />
             <input
               onChange={e => setEmail(e.target.value)}
               value={email}
@@ -90,7 +86,6 @@ const Login = () => {
           </div>
 
           <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
-            <img src={assets.lock_icon} alt="lock" />
             <input
               onChange={e => setPassword(e.target.value)}
               value={password}
@@ -101,12 +96,15 @@ const Login = () => {
             />
           </div>
 
-          <p onClick={() => navigate('/reset-password')} className='mb-4 text-indigo-500 cursor-pointer'>
+          <p
+            onClick={() => navigate('/reset-password')}
+            className='mb-4 text-indigo-500 cursor-pointer'
+          >
             Forgot password?
           </p>
 
           <button className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 hover:from-indigo-900 hover:to-indigo-500 font-semibold text-white text-lg'>
-            {state === 'Sign Up' ? 'Create Account' : 'Login'}
+            Login
           </button>
         </form>
 
