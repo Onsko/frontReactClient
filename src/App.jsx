@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import EmailVerify from './pages/EmailVerify';
@@ -14,16 +14,13 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   const { userData, isLoggedIn } = useContext(AppContent);
 
   if (!isLoggedIn) {
-    // Si pas connecté, on redirige vers login
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userData.role)) {
-    // Si rôle non autorisé, on redirige vers la page d'accueil
+  if (allowedRoles && !allowedRoles.includes(userData?.role)) {
     return <Navigate to="/" replace />;
   }
 
-  // Sinon on affiche le composant enfant
   return children;
 };
 
@@ -35,16 +32,15 @@ const App = () => {
     const fetchUserData = async () => {
       try {
         const res = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
-
         if (res.data.success) {
-          setUserData(res.data.user);
+          setUserData(res.data.userData);
           setIsLoggedIn(true);
         } else {
           setIsLoggedIn(false);
           setUserData(null);
         }
       } catch (err) {
-        console.log("Erreur récupération des données utilisateur :", err.message);
+        console.error("Erreur récupération des données utilisateur :", err.message);
         setIsLoggedIn(false);
         setUserData(null);
       } finally {
@@ -56,7 +52,7 @@ const App = () => {
   }, [backendUrl, setIsLoggedIn, setUserData]);
 
   if (loading) {
-    return <div>Chargement...</div>; // Loader pendant la récupération user
+    return <div>Chargement...</div>;
   }
 
   return (
