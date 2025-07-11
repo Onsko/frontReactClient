@@ -6,7 +6,6 @@ import Login from './pages/Login';
 import EmailVerify from './pages/EmailVerify';
 import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminUsers from './pages/AdminUsers';
 
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
@@ -24,7 +23,6 @@ const App = () => {
         console.log('[App] Réponse user data:', res.data);
 
         if (res.data.success) {
-          // Attention ici: backend renvoie userData, pas user
           setUserData(res.data.userData);
           setIsLoggedIn(true);
           console.log('[App] User set:', res.data.userData);
@@ -49,8 +47,7 @@ const App = () => {
     return <div>Chargement...</div>;
   }
 
-  // Simple protection: si pas connecté, on redirige vers login ou home pour admin pages
-  // Tu peux renforcer avec role admin si tu veux
+  // Protection des routes
   const RequireAuth = ({ children }) => {
     if (!isLoggedIn) {
       return <Navigate to="/login" replace />;
@@ -62,27 +59,20 @@ const App = () => {
     <div>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/email-verify' element={<EmailVerify />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/email-verify" element={<EmailVerify />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Routes admin protégées côté client */}
-        <Route 
-          path='/admin' 
+        {/* Admin : tout ce qui commence par /admin est géré dans AdminDashboard.jsx */}
+        <Route
+          path="/admin/*"
           element={
             <RequireAuth>
               <AdminDashboard />
             </RequireAuth>
-          } 
-        />
-        <Route 
-          path="/admin/users" 
-          element={
-            <RequireAuth>
-              <AdminUsers />
-            </RequireAuth>
-          } 
+          }
         />
       </Routes>
     </div>
