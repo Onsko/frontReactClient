@@ -1,10 +1,13 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import EmailVerify from './pages/EmailVerify';
 import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import axios from 'axios';
@@ -21,9 +24,10 @@ const App = () => {
         console.log('[App] Réponse user data:', res.data);
 
         if (res.data.success) {
-          setUserData(res.data.user);
+          // Attention ici: backend renvoie userData, pas user
+          setUserData(res.data.userData);
           setIsLoggedIn(true);
-          console.log('[App] User set:', res.data.user);
+          console.log('[App] User set:', res.data.userData);
         } else {
           setIsLoggedIn(false);
           setUserData(null);
@@ -45,6 +49,15 @@ const App = () => {
     return <div>Chargement...</div>;
   }
 
+  // Simple protection: si pas connecté, on redirige vers login ou home pour admin pages
+  // Tu peux renforcer avec role admin si tu veux
+  const RequireAuth = ({ children }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/login" replace />;
+    }
+    return children;
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -53,8 +66,24 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/email-verify' element={<EmailVerify />} />
         <Route path='/reset-password' element={<ResetPassword />} />
-        {/* Route admin SANS protection */}
-        <Route path='/admin' element={<AdminDashboard />} />
+
+        {/* Routes admin protégées côté client */}
+        <Route 
+          path='/admin' 
+          element={
+            <RequireAuth>
+              <AdminDashboard />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/admin/users" 
+          element={
+            <RequireAuth>
+              <AdminUsers />
+            </RequireAuth>
+          } 
+        />
       </Routes>
     </div>
   );
