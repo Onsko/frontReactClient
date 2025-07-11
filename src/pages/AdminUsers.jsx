@@ -1,135 +1,171 @@
 import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
-  // Récupérer tous les utilisateurs depuis le backend
-  const fetchUsers = async () => {
+  const fetchUsers = async (currentPage = 1, search = '') => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/admin/users', {
+      const res = await fetch(`http://localhost:4000/api/admin/users?page=${currentPage}&limit=5&search=${search}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Pour envoyer les cookies (JWT si stocké en cookie)
-      });
-
-      if (!res.ok) {
-        // Si status HTTP différent de 2xx, essayer de lire message d'erreur
-        const errorData = await res.json().catch(() => null);
-        setError(errorData?.message || `Erreur ${res.status}`);
-        setUsers([]);
-      } else {
-        const data = await res.json();
-        if (data.success) {
-          setUsers(data.users);
-          setError('');
-        } else {
-          setError(data.message || 'Erreur lors du chargement des utilisateurs');
-          setUsers([]);
-        }
-      }
-    } catch (err) {
-      setError(err.message || 'Erreur réseau');
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Bloquer / débloquer un utilisateur
-  const toggleBlockUser = async (id) => {
-    try {
-      const res = await fetch(`/api/admin/users/block/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        fetchUsers(); // Rafraîchir la liste après modification
+        setUsers(data.users);
+        setTotalPages(data.totalPages);
+        setError('');
       } else {
-        alert(data.message || 'Erreur lors de la mise à jour');
+        setError(data.message || 'Erreur lors du chargement');
+        setUsers([]);
       }
     } catch (err) {
-      alert(err.message || 'Erreur réseau');
+      setError(err.message);
+      setUsers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Chargement initial des utilisateurs
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const toggleBlockUser = async (id, isBlocked) => {
+    const result = await MySwal.fire({
+      title: isBlocked ? 'Débloquer cet utilisateur ?' : 'Bloquer cet utilisateur ?',
+      text: isBlocked
+        ? "L'utilisateur pourra se reconnecter après cette action."
+        : "L'utilisateur ne pourra plus se connecter.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: isBlocked ? 'Débloquer' : 'Bloquer',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: isBlocked ? '#16a34a' : '#dc2626',
+      reverseButtons: true,
+    });
 
-  if (loading) return <div className="p-4 text-blue-600 font-semibold">Chargement...</div>;
-  if (error) return <div className="p-4 text-red-600 font-bold">Erreur : {error}</div>;
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/admin/users/block/${id}`, {
+        method: 'PUT',
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await fetchUsers(page, search);
+        MySwal.fire({
+          title: 'Succès',
+          text: data.message,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        throw new Error(data.message || 'Échec de la mise à jour');
+      }
+    } catch (err) {
+      MySwal.fire({
+        title: 'Erreur',
+        text: err.message,
+        icon: 'error',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(page, search);
+  }, [page, search]);
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">👥 Gestion des Utilisateurs</h1>
 
-      <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-        <thead className="bg-gray-100 text-left">
-          <tr>
-            <th className="p-3 border">Nom</th>
-            <th className="p-3 border">Email</th>
-            <th className="p-3 border">Rôle</th>
-            <th className="p-3 border">Bloqué</th>
-            <th className="p-3 border text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan="5" className="text-center p-4">
-                Aucun utilisateur trouvé.
-              </td>
-            </tr>
-          ) : (
-            users.map((user) => (
-              <tr key={user._id} className="hover:bg-gray-50">
-                <td className="p-3 border">{user.name}</td>
-                <td className="p-3 border">{user.email}</td>
-                <td className="p-3 border">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      user.role === 'admin'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
-                <td className="p-3 border text-center">
-                  <span
-                    className={`text-sm font-bold ${
-                      user.isBlocked ? 'text-red-600' : 'text-green-600'
-                    }`}
-                  >
-                    {user.isBlocked ? 'Oui' : 'Non'}
-                  </span>
-                </td>
-                <td className="p-3 border text-center">
-                  <button
-                    onClick={() => toggleBlockUser(user._id)}
-                    className={`px-4 py-1 rounded text-white text-sm font-medium shadow ${
-                      user.isBlocked
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-red-600 hover:bg-red-700'
-                    }`}
-                  >
-                    {user.isBlocked ? 'Débloquer' : 'Bloquer'}
-                  </button>
-                </td>
+      <input
+        type="text"
+        placeholder="Rechercher par nom, email ou rôle..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border px-4 py-2 rounded-md w-1/2 mb-4"
+      />
+
+      {loading ? (
+        <p>Chargement...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : (
+        <>
+          <table className="w-full border border-gray-300 rounded">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border">Nom</th>
+                <th className="p-3 border">Email</th>
+                <th className="p-3 border">Rôle</th>
+                <th className="p-3 border">Bloqué</th>
+                <th className="p-3 border">Date d’inscription</th>
+                <th className="p-3 border">Action</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u._id} className="hover:bg-gray-50">
+                  <td className="p-3 border">{u.name}</td>
+                  <td className="p-3 border">{u.email}</td>
+                  <td className="p-3 border">{u.role}</td>
+                  <td className="p-3 border text-center">
+                    <span className={u.isBlocked ? 'text-red-600' : 'text-green-600'}>
+                      {u.isBlocked ? 'Oui' : 'Non'}
+                    </span>
+                  </td>
+                  <td className="p-3 border">
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-3 border text-center">
+                    <button
+                      onClick={() => toggleBlockUser(u._id, u.isBlocked)}
+                      className={`px-4 py-1 text-white rounded ${
+                        u.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                      }`}
+                    >
+                      {u.isBlocked ? 'Débloquer' : 'Bloquer'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="mt-4 flex justify-center gap-4">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded hover:bg-gray-200"
+            >
+              Précédent
+            </button>
+            <span className="self-center">
+              Page {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-1 border rounded hover:bg-gray-200"
+            >
+              Suivant
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
