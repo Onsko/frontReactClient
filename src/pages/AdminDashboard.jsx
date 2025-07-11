@@ -1,37 +1,21 @@
-import React, { useContext } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { AppContent } from '../context/AppContext';
+import React, { useEffect } from 'react';
+import AdminSidebar from '../components/AdminSidebar';
 
 const AdminDashboard = () => {
-  const { backendUrl, setUserData, setIsLoggedIn } = useContext(AppContent);
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/api/logout`, {
-        withCredentials: true
-      });
-
-      if (res.data.success) {
-        setUserData(null);
-        setIsLoggedIn(false);
-        navigate('/');
-      }
-    } catch (error) {
-      console.log("Erreur lors de la déconnexion :", error.message);
-    }
-  };
+  useEffect(() => {
+    console.log('[AdminDashboard] Page AdminDashboard affichée');
+  }, []);
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-gray-200">
-      <h1 className="text-3xl font-bold mb-4">Hello Admin!</h1>
-      <button
-        onClick={handleLogout}
-        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-      >
-        Logout
-      </button>
+    <div className="flex min-h-screen bg-[url('/bg_img.png')] bg-cover bg-center text-white">
+      <AdminSidebar />
+      <div className="flex-1 p-10">
+<h1 className="text-4xl font-extrabold text-[#0c1b4d] mb-6 drop-shadow-sm">
+  BIENVENUE DANS LE DASHBOARD ADMIN
+</h1>
+
+        <p>Tu peux gérer les utilisateurs et les produits à gauche.</p>
+      </div>
     </div>
   );
 };
