@@ -4,6 +4,14 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminUsers from './AdminUsers';
 
+import AdminProducts from '../components/admin/ProductList';
+import EditProduct from '../components/admin/EditProduct';
+import AddProduct from '../components/admin/AddProduct';
+
+
+
+
+
 const AdminDashboard = () => {
   const location = useLocation();
 
@@ -12,7 +20,7 @@ const AdminDashboard = () => {
       <AdminSidebar />
 
       <div className="flex-1 p-10 bg-white text-black rounded-lg shadow">
-        {/* Afficher le titre seulement si aucune sous-route active */}
+        {/* Affichage page d'accueil admin */}
         {location.pathname === '/admin' && (
           <>
             <h1 className="text-4xl font-extrabold text-[#0c1b4d] mb-6 drop-shadow-sm">
@@ -22,11 +30,14 @@ const AdminDashboard = () => {
           </>
         )}
 
-        {/* Sous-routes à l’intérieur de /admin */}
-        <Routes>
-          <Route path="users" element={<AdminUsers />} />
-          {/* Tu pourras ajouter ici d'autres routes comme <Route path="products" element={<AdminProducts />} /> */}
-        </Routes>
+        {/* Routes internes du dashboard admin */}
+       <Routes>
+  <Route path="users" element={<AdminUsers />} />
+  <Route path="products" element={<AdminProducts />} />
+  <Route path="products/edit/:id" element={<EditProduct />} />
+  <Route path="products/add" element={<AddProduct />} />
+</Routes>
+
       </div>
     </div>
   );
