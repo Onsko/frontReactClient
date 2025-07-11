@@ -28,28 +28,28 @@ const Login = () => {
         const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
         console.log('[Login] User data reçue:', resUser.data);
 
-      if (resUser.data.success) {
-  const user = resUser.data.userData;
-  setUserData(user);
-  setIsLoggedIn(true);
+        if (resUser.data.success) {
+          const user = resUser.data.userData;
+          setUserData(user);
+          setIsLoggedIn(true);
 
-  console.log('[Login] Objet user:', user);
+          console.log('[Login] Objet user:', user);
 
-  if (user.role === "admin") {
-    console.log('[Login] Connexion admin détectée, redirection vers /admin');
-    navigate("/admin");
-  } else {
-    console.log('[Login] Connexion user normale, redirection vers /');
-    navigate("/");
-  }
+          if (user.role === "admin") {
+            console.log('[Login] Connexion admin détectée, redirection vers /admin');
+            navigate("/admin");
+          } else {
+            console.log('[Login] Connexion user normale, redirection vers /');
+            navigate("/");
+          }
 
-  toast.success("Connexion réussie");
-} else {
-  toast.error("Impossible de récupérer les infos utilisateur");
-}
-
+          toast.success("Connexion réussie");
+        } else {
+          toast.error("Impossible de récupérer les infos utilisateur");
+        }
       } else {
-        toast.error("Erreur lors de la connexion");
+        // Affiche le message spécifique reçu (ex: compte bloqué)
+        toast.error(data.message || "Erreur lors de la connexion");
       }
     } catch (error) {
       console.log('[Login] Erreur login:', error);
