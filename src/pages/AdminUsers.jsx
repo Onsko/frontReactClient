@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -6,10 +10,9 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [search,setSearch]= useState('');
+  const [search, setSearch] = useState('');
 
-
-  const fetchUsers = async (currentPage = 1,search='') => {
+  const fetchUsers = async (currentPage = 1, search = '') => {
     setLoading(true);
     try {
       const res = await fetch(`http://localhost:4000/api/admin/users?page=${currentPage}&limit=5&search=${search}`, {
@@ -35,9 +38,21 @@ const AdminUsers = () => {
     }
   };
 
-  const toggleBlockUser = async (id) => {
-    const confirmAction = window.confirm('Confirmer cette action ?');
-    if (!confirmAction) return;
+  const toggleBlockUser = async (id, isBlocked) => {
+    const result = await MySwal.fire({
+      title: isBlocked ? 'Débloquer cet utilisateur ?' : 'Bloquer cet utilisateur ?',
+      text: isBlocked
+        ? "L'utilisateur pourra se reconnecter après cette action."
+        : "L'utilisateur ne pourra plus se connecter.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: isBlocked ? 'Débloquer' : 'Bloquer',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: isBlocked ? '#16a34a' : '#dc2626',
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch(`http://localhost:4000/api/admin/users/block/${id}`, {
@@ -47,29 +62,42 @@ const AdminUsers = () => {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        fetchUsers(page); // reload current page
+        await fetchUsers(page, search);
+        MySwal.fire({
+          title: 'Succès',
+          text: data.message,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } else {
-        alert(data.message || 'Erreur');
+        throw new Error(data.message || 'Échec de la mise à jour');
       }
     } catch (err) {
-      alert(err.message);
+      MySwal.fire({
+        title: 'Erreur',
+        text: err.message,
+        icon: 'error',
+      });
     }
   };
 
   useEffect(() => {
-    fetchUsers(page,search);
-  }, [page,search]);
+    fetchUsers(page, search);
+  }, [page, search]);
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">👥 Gestion des Utilisateurs</h1>
-       <input
-          type="text"
-          placeholder="Rechercher par nom, email ou rôle..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-4 py-2 rounded-md w-1/2"
-        />
+
+      <input
+        type="text"
+        placeholder="Rechercher par nom, email ou rôle..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border px-4 py-2 rounded-md w-1/2 mb-4"
+      />
+
       {loading ? (
         <p>Chargement...</p>
       ) : error ? (
@@ -103,9 +131,9 @@ const AdminUsers = () => {
                   </td>
                   <td className="p-3 border text-center">
                     <button
-                      onClick={() => toggleBlockUser(u._id)}
+                      onClick={() => toggleBlockUser(u._id, u.isBlocked)}
                       className={`px-4 py-1 text-white rounded ${
-                        u.isBlocked ? 'bg-green-600' : 'bg-red-600'
+                        u.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
                       }`}
                     >
                       {u.isBlocked ? 'Débloquer' : 'Bloquer'}
@@ -125,7 +153,9 @@ const AdminUsers = () => {
             >
               Précédent
             </button>
-            <span className="self-center">Page {page} / {totalPages}</span>
+            <span className="self-center">
+              Page {page} / {totalPages}
+            </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
