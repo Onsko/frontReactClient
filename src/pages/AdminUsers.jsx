@@ -6,11 +6,13 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search,setSearch]= useState('');
 
-  const fetchUsers = async (currentPage = 1) => {
+
+  const fetchUsers = async (currentPage = 1,search='') => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/admin/users?page=${currentPage}&limit=5`, {
+      const res = await fetch(`http://localhost:4000/api/admin/users?page=${currentPage}&limit=5&search=${search}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -55,12 +57,19 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
-    fetchUsers(page);
-  }, [page]);
+    fetchUsers(page,search);
+  }, [page,search]);
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">👥 Gestion des Utilisateurs</h1>
+       <input
+          type="text"
+          placeholder="Rechercher par nom, email ou rôle..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-md w-1/2"
+        />
       {loading ? (
         <p>Chargement...</p>
       ) : error ? (
