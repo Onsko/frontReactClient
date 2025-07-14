@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const AddProduct = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -12,45 +15,57 @@ const AddProduct = () => {
     image: null,
   });
 
+  const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    if (e.target.name === "image") {
-      setFormData({ ...formData, image: e.target.files[0] });
-    } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setPreview(URL.createObjectURL(file));
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const formDataToSend = new FormData();
-  formDataToSend.append("name", formData.name);
-  formDataToSend.append("price", formData.price);
-  formDataToSend.append("description", formData.description);
-  formDataToSend.append("category", formData.category);
-  formDataToSend.append("stock", formData.stock);
-  formDataToSend.append("image", formData.image); // ✅ BON ICI
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("stock", formData.stock);
 
-  try {
-    const response = await axios.post("http://localhost:4000/api/products", formDataToSend, {
-      headers: { "Content-Type": "multipart/form-data" },
-      withCredentials: true,
-    });
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
 
-    alert("✅ Produit ajouté avec succès !");
-    setFormData({ name: "", description: "", price: "", category: "", stock: "", image: null });
-  } catch (err) {
-    alert("❌ Erreur lors de l'ajout : " + (err.response?.data?.message || err.message));
-  }
-};
+      await axios.post("http://localhost:4000/api/products", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
 
+      await Swal.fire({
+        icon: "success",
+        title: "Produit ajouté avec succès !",
+        timer: 1500,
+        showConfirmButton: false,
+      });
 
-
-
+      navigate("/admin/products");
+    } catch (err) {
+      await Swal.fire({
+        icon: "error",
+        title: "Erreur lors de l'ajout",
+        text: err.response?.data?.message || err.message,
+      });
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-4">
@@ -58,8 +73,7 @@ const AddProduct = () => {
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-
+      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
         <div>
           <label className="block mb-1 font-semibold" htmlFor="name">Nom :</label>
           <input
@@ -82,7 +96,7 @@ const AddProduct = () => {
             onChange={handleChange}
             required
             className="w-full border px-3 py-2 rounded"
-          ></textarea>
+          />
         </div>
 
         <div>
@@ -134,9 +148,12 @@ const AddProduct = () => {
             id="image"
             name="image"
             accept="image/*"
-            onChange={handleChange}
+            onChange={handleImageChange}
             className="w-full"
           />
+          {preview && (
+            <img src={preview} alt="Preview" className="mt-2 max-h-48 object-contain" />
+          )}
         </div>
 
         <button

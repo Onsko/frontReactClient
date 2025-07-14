@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const EditProduct = () => {
-  const { id } = useParams(); // Récupérer l'id produit depuis l'URL
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -12,49 +13,42 @@ const EditProduct = () => {
     price: "",
     category: "",
     stock: "",
-    image: null,       // pour le nouveau fichier sélectionné
+    image: null,
   });
 
-  const [existingImage, setExistingImage] = useState(null); // URL de l'image actuelle du produit
-  const [preview, setPreview] = useState(null);            // Prévisualisation de la nouvelle image
+  const [existingImage, setExistingImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
 
-  // Charger les données actuelles du produit au chargement du composant
   useEffect(() => {
     axios.get(`http://localhost:4000/api/products/${id}`)
       .then(res => {
-        const product = res.data.product || res.data; // selon ta réponse backend
+        const product = res.data.product || res.data;
         setFormData({
           name: product.name,
           description: product.description,
           price: product.price,
           category: product.category,
           stock: product.stock,
-          image: null,  // pas encore changé
+          image: null,
         });
-        setExistingImage(product.imageUrl); // image actuelle
+        setExistingImage(product.imageUrl);
       })
-      .catch(err => setError("Erreur lors du chargement du produit"));
+      .catch(() => setError("Erreur lors du chargement du produit"));
   }, [id]);
 
-  // Quand on choisit une nouvelle image, mettre à jour la preview et le fichier
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData({ ...formData, image: file });
-
-      // Générer une URL locale pour prévisualisation
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  // Gérer les autres champs texte
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Soumettre la modification
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -75,10 +69,20 @@ const EditProduct = () => {
         withCredentials: true,
       });
 
-      alert("Produit modifié avec succès !");
-      navigate("/admin/products"); // redirection vers la liste des produits (à adapter)
+      await Swal.fire({
+        icon: "success",
+        title: "Produit modifié avec succès !",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      navigate("/admin/products");
     } catch (err) {
-      alert("Erreur lors de la modification : " + (err.response?.data?.message || err.message));
+      await Swal.fire({
+        icon: "error",
+        title: "Erreur lors de la modification",
+        text: err.response?.data?.message || err.message,
+      });
     }
   };
 
@@ -89,7 +93,6 @@ const EditProduct = () => {
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-
         <div>
           <label className="block mb-1 font-semibold" htmlFor="name">Nom :</label>
           <input
@@ -167,7 +170,6 @@ const EditProduct = () => {
             onChange={handleImageChange}
             className="w-full"
           />
-          {/* Affichage de la prévisualisation ou de l'image existante */}
           {preview ? (
             <img src={preview} alt="Preview" className="mt-2 max-h-48 object-contain" />
           ) : existingImage ? (
