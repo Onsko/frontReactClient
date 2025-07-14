@@ -1,75 +1,149 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddProduct = () => {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [visibility, setVisibility] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "",
+    image: null,
+  });
+
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await axios.post('http://localhost:4000/api/products', {
-        name,
-        price: Number(price),
-        visibility,
-      });
-      alert('Produit ajouté avec succès !');
-      navigate('/admin/products');
-    } catch (err) {
-      alert('Erreur lors de l’ajout du produit : ' + err.message);
-    } finally {
-      setLoading(false);
+  const handleChange = (e) => {
+    if (e.target.name === "image") {
+      setFormData({ ...formData, image: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
     }
   };
 
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const formDataToSend = new FormData();
+  formDataToSend.append("name", formData.name);
+  formDataToSend.append("price", formData.price);
+  formDataToSend.append("description", formData.description);
+  formDataToSend.append("category", formData.category);
+  formDataToSend.append("stock", formData.stock);
+  formDataToSend.append("image", formData.image); // ✅ BON ICI
+
+  try {
+    const response = await axios.post("http://localhost:4000/api/products", formDataToSend, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+
+    alert("✅ Produit ajouté avec succès !");
+    setFormData({ name: "", description: "", price: "", category: "", stock: "", image: null });
+  } catch (err) {
+    alert("❌ Erreur lors de l'ajout : " + (err.response?.data?.message || err.message));
+  }
+};
+
+
+
+
+
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div className="max-w-lg mx-auto p-4">
       <h2 className="text-xl font-bold mb-4">Ajouter un produit</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label>
-          Nom :
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="name">Nom :</label>
           <input
             type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             required
-            className="border p-2 w-full"
+            className="w-full border px-3 py-2 rounded"
           />
-        </label>
+        </div>
 
-        <label>
-          Prix (€) :
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="description">Description :</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded"
+          ></textarea>
+        </div>
+
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="price">Prix (€) :</label>
           <input
             type="number"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
             required
             min="0"
             step="0.01"
-            className="border p-2 w-full"
+            className="w-full border px-3 py-2 rounded"
           />
-        </label>
+        </div>
 
-        <label className="flex items-center gap-2">
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="category">Catégorie :</label>
           <input
-            type="checkbox"
-            checked={visibility}
-            onChange={e => setVisibility(e.target.checked)}
+            type="text"
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded"
           />
-          Visible
-        </label>
+        </div>
+
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="stock">Stock :</label>
+          <input
+            type="number"
+            id="stock"
+            name="stock"
+            value={formData.stock}
+            onChange={handleChange}
+            required
+            min="0"
+            className="w-full border px-3 py-2 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-semibold" htmlFor="image">Image :</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+            className="w-full"
+          />
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="bg-green-600 text-white py-2 rounded hover:bg-green-800"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
         >
-          {loading ? 'Ajout en cours...' : 'Ajouter'}
+          Ajouter
         </button>
       </form>
     </div>
