@@ -99,7 +99,7 @@ const ProductList = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Liste des produits</h2>
+      <h1 className="text-3xl font-bold mb-6"> Gestion des Produits</h1>
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
