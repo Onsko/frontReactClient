@@ -16,13 +16,26 @@ const EditProduct = () => {
     image: null,
   });
 
+  const [categories, setCategories] = useState([]);
   const [existingImage, setExistingImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
 
+  // Charger les catégories
   useEffect(() => {
-    axios.get(`http://localhost:4000/api/products/${id}`)
-      .then(res => {
+    axios
+      .get("http://localhost:4000/api/categories")
+      .then((res) => setCategories(res.data))
+      .catch((err) =>
+        console.error("Erreur chargement des catégories :", err)
+      );
+  }, []);
+
+  // Charger les infos du produit
+  useEffect(() => {
+    axios
+      .get(`http://localhost:4000/api/products/${id}`)
+      .then((res) => {
         const product = res.data.product || res.data;
         setFormData({
           name: product.name,
@@ -135,15 +148,21 @@ const EditProduct = () => {
 
         <div>
           <label className="block mb-1 font-semibold" htmlFor="category">Catégorie :</label>
-          <input
-            type="text"
+          <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
             required
             className="w-full border px-3 py-2 rounded"
-          />
+          >
+            <option value="">-- Sélectionner une catégorie --</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

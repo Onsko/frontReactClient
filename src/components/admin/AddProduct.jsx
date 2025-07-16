@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -15,8 +15,18 @@ const AddProduct = () => {
     image: null,
   });
 
+  const [categories, setCategories] = useState([]);
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/api/categories")
+      .then((res) => setCategories(res.data))
+      .catch((err) =>
+        console.error("Erreur chargement des catégories :", err)
+      );
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -73,9 +83,15 @@ const AddProduct = () => {
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        encType="multipart/form-data"
+      >
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="name">Nom :</label>
+          <label className="block mb-1 font-semibold" htmlFor="name">
+            Nom :
+          </label>
           <input
             type="text"
             id="name"
@@ -88,7 +104,9 @@ const AddProduct = () => {
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="description">Description :</label>
+          <label className="block mb-1 font-semibold" htmlFor="description">
+            Description :
+          </label>
           <textarea
             id="description"
             name="description"
@@ -100,7 +118,9 @@ const AddProduct = () => {
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="price">Prix (€) :</label>
+          <label className="block mb-1 font-semibold" htmlFor="price">
+            Prix (€) :
+          </label>
           <input
             type="number"
             id="price"
@@ -115,20 +135,30 @@ const AddProduct = () => {
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="category">Catégorie :</label>
-          <input
-            type="text"
+          <label className="block mb-1 font-semibold" htmlFor="category">
+            Catégorie :
+          </label>
+          <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
             required
             className="w-full border px-3 py-2 rounded"
-          />
+          >
+            <option value="">-- Sélectionner une catégorie --</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="stock">Stock :</label>
+          <label className="block mb-1 font-semibold" htmlFor="stock">
+            Stock :
+          </label>
           <input
             type="number"
             id="stock"
@@ -142,7 +172,9 @@ const AddProduct = () => {
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold" htmlFor="image">Image :</label>
+          <label className="block mb-1 font-semibold" htmlFor="image">
+            Image :
+          </label>
           <input
             type="file"
             id="image"
@@ -152,7 +184,11 @@ const AddProduct = () => {
             className="w-full"
           />
           {preview && (
-            <img src={preview} alt="Preview" className="mt-2 max-h-48 object-contain" />
+            <img
+              src={preview}
+              alt="Preview"
+              className="mt-2 max-h-48 object-contain"
+            />
           )}
         </div>
 
