@@ -3,14 +3,12 @@ import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminUsers from './AdminUsers';
-
 import AdminProducts from '../components/admin/ProductList';
 import EditProduct from '../components/admin/EditProduct';
 import AddProduct from '../components/admin/AddProduct';
 
-
-
-
+import CategoryList from '../components/admin/CategoryList';
+import AddCategory from '../components/admin/AddCategory';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -20,27 +18,25 @@ const AdminDashboard = () => {
       <AdminSidebar />
 
       <div className="flex-1 p-10 bg-white text-black rounded-lg shadow">
-        {/* Affichage page d'accueil admin */}
         {location.pathname === '/admin' && (
           <>
             <h1 className="text-4xl font-extrabold text-[#0c1b4d] mb-6 drop-shadow-sm">
               BIENVENUE DANS LE DASHBOARD ADMIN
             </h1>
-            <p>Tu peux gérer les utilisateurs et les produits à gauche.</p>
+            <p>Tu peux gérer les utilisateurs, produits et catégories à gauche.</p>
           </>
         )}
 
-        {/* Routes internes du dashboard admin */}
-       <Routes>
-  <Route path="users" element={<AdminUsers />} />
-  <Route path="products" element={<AdminProducts />} />
-  <Route path="products/edit/:id" element={<EditProduct />} />
-  <Route path="products/add" element={<AddProduct />} />
-  <Route path="/admin/add-product" element={<AddProduct />} />
-<Route path="/admin/edit-product/:id" element={<EditProduct />} />
+        <Routes>
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="products/edit/:id" element={<EditProduct />} />
+          <Route path="products/add" element={<AddProduct />} />
 
-</Routes>
-
+          {/* Categories routes */}
+          <Route path="categories" element={<CategoryList />} />
+          <Route path="categories/add" element={<AddCategory />} />
+        </Routes>
       </div>
     </div>
   );
