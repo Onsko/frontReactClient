@@ -7,10 +7,20 @@ const CategoryList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/categories') // change le port selon ton backend
+    fetch('http://localhost:4000/api/categories') // adapte le port si besoin
       .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(err => console.error(err));
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setCategories(data);
+        } else {
+          console.error("Format inattendu :", data);
+          setCategories([]);
+        }
+      })
+      .catch(err => {
+        console.error("Erreur API :", err);
+        setCategories([]);
+      });
   }, []);
 
   return (

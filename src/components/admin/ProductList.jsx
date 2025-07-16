@@ -93,7 +93,6 @@ const ProductList = () => {
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       navigate(`/admin/products?page=${page}`);
-      // Le useEffect sur location.search s’occupera de charger la bonne page
     }
   };
 
@@ -147,7 +146,7 @@ const ProductList = () => {
                 </td>
                 <td className="p-2 border">{prod.name}</td>
                 <td className="p-2 border">{prod.price.toFixed(2)}</td>
-                <td className="p-2 border">{prod.category}</td>
+                <td className="p-2 border">{prod.category?.name || "Inconnu"}</td>
                 <td className="p-2 border">{prod.stock}</td>
                 <td className="p-2 border">
                   <button
