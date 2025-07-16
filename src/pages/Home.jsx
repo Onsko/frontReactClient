@@ -13,33 +13,24 @@ const Home = () => {
 
   const backendUrl = 'http://localhost:4000';
 
-  const formatName = (name) =>
-  name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-
-  // Récupérer catégories dynamiques
- const fetchCategories = async () => {
-  try {
-    const { data } = await axios.get(`${backendUrl}/api/product/distinct-categories`);
-    if (data.success) {
-      const formattedCategories = data.categories.map((name) => ({
-        name,
-      //  imageUrl: `/category-images/${formatName(name)}.png`,
-      }));
-      setCategories(formattedCategories);
+  // Récupérer catégories dynamiques depuis la collection Category (avec images)
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/categories`);
+      // data est directement un tableau d'objets category (sans success ?)
+      setCategories(data);
+    } catch (err) {
+      console.error('Erreur de récupération des catégories:', err.message);
     }
-  } catch (err) {
-    console.error('Erreur de récupération des catégories:', err.message);
-  }
-};
+  };
 
-  // Récupérer produits paginés
+  // Récupérer produits paginés (inchangé)
   const fetchProducts = async (page) => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/product?page=${page}&limit=${productsPerPage}`);
-      if (data.success) {
-        setProducts(data.products);
-        setTotalPages(data.totalPages);
-      }
+      const { data } = await axios.get(`${backendUrl}/api/products?page=${page}&limit=${productsPerPage}`);
+      // On suppose que data contient products, totalPages etc.
+      setProducts(data.products);
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Erreur de récupération des produits', error.message);
     }
@@ -60,20 +51,19 @@ const Home = () => {
       </header>
 
       {/* Catégories dynamiques */}
-    <section className="categories flex flex-wrap justify-center gap-10 my-10 px-4">
-  {categories.map((cat, idx) => (
-    <div key={idx} className="category-circle text-center cursor-pointer group">
-      <img
-        src={cat.imageUrl}
-        alt={cat.name}
-        onError={(e) => { e.target.src = "/hhh.png"; }}  // image fallback
-        className="w-[120px] h-[120px] object-cover rounded-full"
-      />
-      <p className="mt-2 text-gray-600 text-sm">{cat.name}</p>
-    </div>
-  ))}
-</section>
-
+      <section className="categories flex flex-wrap justify-center gap-10 my-10 px-4">
+        {categories.map((cat) => (
+          <div key={cat._id} className="category-circle text-center cursor-pointer group">
+            <img
+              src={cat.imageUrl ? `${backendUrl}/category-images/${cat.imageUrl}` : "/hhh.png"}
+              alt={cat.name}
+              onError={(e) => { e.target.src = "/hhh.png"; }}
+              className="w-[120px] h-[120px] object-cover rounded-full"
+            />
+            <p className="mt-2 text-gray-600 text-sm">{cat.name}</p>
+          </div>
+        ))}
+      </section>
 
       {/* Produits */}
       <section className="product-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-10">
