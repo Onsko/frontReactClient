@@ -137,7 +137,7 @@ const ProductList = () => {
                 <td className="p-2 border">
                   {prod.imageUrl ? (
                     <img
-                      src={`http://localhost:4000${prod.imageUrl}`}
+                      src={`http://localhost:4000/uploads/${prod.imageUrl}`}
                       alt={prod.name}
                       className="h-12 mx-auto object-contain"
                     />

@@ -23,7 +23,7 @@ const Home = () => {
     if (data.success) {
       const formattedCategories = data.categories.map((name) => ({
         name,
-        imageUrl: `/category-images/${formatName(name)}.png`,
+      //  imageUrl: `/category-images/${formatName(name)}.png`,
       }));
       setCategories(formattedCategories);
     }
