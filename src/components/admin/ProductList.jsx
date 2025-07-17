@@ -24,7 +24,7 @@ const ProductList = () => {
   const fetchProducts = async (page = 1) => {
     try {
       setError(null);
-      const res = await axios.get(`http://localhost:4000/api/products?page=${page}&limit=${pageSize}`);
+const res = await axios.get(`http://localhost:4000/api/products/admin/all?page=${page}&limit=${pageSize}`);
       const { products: fetchedProducts, totalPages: fetchedTotalPages } = res.data;
 
       setProducts(fetchedProducts || []);
