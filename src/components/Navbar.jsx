@@ -10,7 +10,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedIn } = useContext(AppContent);
   const { items } = useCart(); // corrigé : nom "items" et pas "cartItems"
-
+console.log(userData)
   // Envoie OTP de vérification email
   const sendVerificationOtp = async () => {
     try {

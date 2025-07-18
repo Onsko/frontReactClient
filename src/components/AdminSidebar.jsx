@@ -1,6 +1,5 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Users, Package, FolderPlus } from 'lucide-react';
+import { LogOut, Users, Package, FolderPlus, ClipboardList } from 'lucide-react'; // ajout ClipboardList
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -37,6 +36,12 @@ const AdminSidebar = () => {
             icon={<FolderPlus size={18} />}
             onClick={() => navigate('/admin/categories')}
             active={isActive('/admin/categories')}
+          />
+          <SidebarButton
+            label="Gestion des commandes"
+            icon={<ClipboardList size={18} />}
+            onClick={() => navigate('/admin/orders')}
+            active={isActive('/admin/orders')}
           />
         </nav>
       </div>

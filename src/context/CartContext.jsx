@@ -27,11 +27,13 @@ function cartReducer(state, action) {
         };
       }
     }
+
     case 'REMOVE_FROM_CART':
       return {
         ...state,
         items: state.items.filter(item => item._id !== action.payload),
       };
+
     case 'UPDATE_QUANTITY':
       return {
         ...state,
@@ -41,6 +43,13 @@ function cartReducer(state, action) {
             : item
         ),
       };
+
+    case 'CLEAR_CART':
+      return {
+        ...state,
+        items: [],
+      };
+
     default:
       return state;
   }
@@ -49,7 +58,7 @@ function cartReducer(state, action) {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  // Sauvegarder le panier dans localStorage à chaque modification
+  // Sauvegarder dans localStorage
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(state.items));
   }, [state.items]);
@@ -63,12 +72,18 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = (productId, quantity) => {
-    if (quantity < 1) return; // éviter quantité négative ou 0
+    if (quantity < 1) return;
     dispatch({ type: 'UPDATE_QUANTITY', payload: { _id: productId, quantity } });
   };
 
-  // Calcul total
-  const totalPrice = state.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+  };
+
+  const totalPrice = state.items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
 
   return (
     <CartContext.Provider
@@ -77,6 +92,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
+        clearCart,
         totalPrice,
       }}
     >

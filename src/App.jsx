@@ -12,6 +12,10 @@ import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import { CartProvider } from './context/CartContext';  // <-- Import ajouté
 import axios from 'axios';
+import Checkout from './pages/Checkout';
+import AdminOrders from './pages/AdminOrders';
+
+
 
 const App = () => {
   const { backendUrl, setIsLoggedIn, setUserData, isLoggedIn } = useContext(AppContent);
@@ -65,6 +69,9 @@ const App = () => {
               </RequireAuth>
             }
           />
+          <Route path="/checkout" element={<Checkout />} />
+<Route path="/admin/orders" element={<AdminOrders />} />
+
         </Routes>
       </CartProvider>
     </>
