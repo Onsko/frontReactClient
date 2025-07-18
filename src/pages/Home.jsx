@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
 import './home.css';
+import { useCart } from '../context/CartContext';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -10,20 +11,19 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [notif, setNotif] = useState(null);
 
   const backendUrl = 'http://localhost:4000';
+  const { addToCart } = useCart();
 
-const fetchCategories = async () => {
-  try {
-    const { data } = await axios.get(`${backendUrl}/api/categories`.trim());
-    setCategories(data);
-  } catch (err) {
-    console.error('Erreur de récupération des catégories:', err.message);
-  }
-};
-
-
-
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/categories`);
+      setCategories(data);
+    } catch (err) {
+      console.error('Erreur de récupération des catégories:', err.message);
+    }
+  };
 
   const fetchProducts = async (page) => {
     try {
@@ -44,6 +44,12 @@ const fetchCategories = async () => {
     }
   };
 
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    setNotif(`${product.name} ajouté au panier ✅`);
+    setTimeout(() => setNotif(null), 3000); // cache la notif après 3 sec
+  };
+
   useEffect(() => {
     fetchCategories();
     fetchProducts(currentPage);
@@ -52,6 +58,13 @@ const fetchCategories = async () => {
   return (
     <div className="bg-[#f9f9f9] text-[#222]">
       <Navbar />
+
+      {/* Notification */}
+      {notif && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
+          {notif}
+        </div>
+      )}
 
       <header className="text-center py-16 px-4">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Bienvenue sur notre boutique élégante</h1>
@@ -96,6 +109,12 @@ const fetchCategories = async () => {
                 <h4 className="text-lg font-semibold">{prod.name}</h4>
                 <p className="text-sm text-gray-500">{prod.description}</p>
                 <p className="text-md font-bold mt-2 text-gray-700">{prod.price} DT</p>
+                <button
+                  onClick={() => handleAddToCart(prod)}
+                  className="mt-3 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+                >
+                  Ajouter au panier
+                </button>
               </div>
             </div>
           ))
