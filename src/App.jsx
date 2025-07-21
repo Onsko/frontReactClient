@@ -8,8 +8,9 @@ import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import CategoryEdit from './components/admin/CategoryEdit.jsx';
 
-import MyOrdersPage from './pages/MyOrders.jsx'; // <-- import ajouté
+import MyOrdersPage from './pages/MyOrders.jsx';
 
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
@@ -73,12 +74,22 @@ const App = () => {
             }
           />
 
-          {/* Dashboard Admin */}
+          {/* Dashboard Admin général */}
           <Route
             path="/admin/*"
             element={
               <RequireAuth>
                 <AdminDashboard />
+              </RequireAuth>
+            }
+          />
+
+          {/* Édition catégorie (route hors AdminDashboard) */}
+          <Route
+            path="/admin/categories/edit/:id"
+            element={
+              <RequireAuth>
+                <CategoryEdit />
               </RequireAuth>
             }
           />
