@@ -24,14 +24,14 @@ const Login = () => {
       );
 
       if (data.success) {
-        const resUser = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+        const resUser = await axios.get(`${backendUrl}/api/auth/user/data`, { withCredentials: true });
 
         if (resUser.data.success) {
-          const user = resUser.data.userData;
+          const user = resUser.data.user;
           setUserData(user);
           setIsLoggedIn(true);
 
-          if (user.role === 'admin') {
+          if (user && user.role === 'admin') {
             navigate('/admin');
           } else {
             navigate('/');

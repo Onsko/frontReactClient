@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Users, Package, FolderPlus, ClipboardList } from 'lucide-react'; // ajout ClipboardList
+import { LogOut, Users, Package, FolderPlus, ClipboardList } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -62,8 +62,10 @@ const AdminSidebar = () => {
 const SidebarButton = ({ label, icon, onClick, active }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium text-left border ${
-      active ? 'bg-white text-[#0c1b4d] border-white' : 'border-white hover:bg-white hover:text-[#0c1b4d]'
+    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium text-left border text-sm ${
+      active
+        ? 'bg-white text-[#0c1b4d] border-white'
+        : 'border-white hover:bg-white hover:text-[#0c1b4d]'
     }`}
   >
     {icon}

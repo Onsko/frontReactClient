@@ -45,9 +45,14 @@ const Home = () => {
   };
 
   const handleAddToCart = (product) => {
-    addToCart(product);
-    setNotif(`${product.name} ajouté au panier ✅`);
-    setTimeout(() => setNotif(null), 3000); // cache la notif après 3 sec
+    if (product.stock > 0) {
+      addToCart(product);
+      setNotif(`${product.name} ajouté au panier ✅`);
+    } else {
+      setNotif(`${product.name} est en rupture de stock ❌`);
+    }
+
+    setTimeout(() => setNotif(null), 3000);
   };
 
   useEffect(() => {
@@ -59,7 +64,6 @@ const Home = () => {
     <div className="bg-[#f9f9f9] text-[#222]">
       <Navbar />
 
-      {/* Notification */}
       {notif && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
           {notif}
@@ -71,7 +75,7 @@ const Home = () => {
         <p className="text-lg text-gray-600">Découvrez nos catégories et produits</p>
       </header>
 
-      {/* Catégories dynamiques */}
+      {/* Catégories */}
       <section className="categories flex flex-wrap justify-center gap-10 my-10 px-4">
         {categories && categories.length > 0 ? (
           categories.map((cat) => (
@@ -98,22 +102,34 @@ const Home = () => {
           products.map((prod, index) => (
             <div
               key={index}
-              className="product-card bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-transform duration-300 hover:-translate-y-1"
+              className="product-card bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-transform duration-300 hover:-translate-y-1 relative"
             >
               <img
                 src={prod.imageUrl ? `${backendUrl}/uploads/${prod.imageUrl}` : '/default-product.png'}
                 alt={prod.name}
                 className="w-full h-48 object-cover"
               />
+              {/* Badge rupture */}
+              {prod.stock <= 0 && (
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                  Rupture de stock
+                </span>
+              )}
               <div className="info p-4">
                 <h4 className="text-lg font-semibold">{prod.name}</h4>
                 <p className="text-sm text-gray-500">{prod.description}</p>
                 <p className="text-md font-bold mt-2 text-gray-700">{prod.price} DT</p>
+
                 <button
                   onClick={() => handleAddToCart(prod)}
-                  className="mt-3 w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+                  disabled={prod.stock <= 0}
+                  className={`mt-3 w-full py-2 rounded transition ${
+                    prod.stock > 0
+                      ? 'bg-black text-white hover:bg-gray-800'
+                      : 'bg-gray-400 text-white cursor-not-allowed'
+                  }`}
                 >
-                  Ajouter au panier
+                  {prod.stock > 0 ? 'Ajouter au panier' : 'Indisponible'}
                 </button>
               </div>
             </div>

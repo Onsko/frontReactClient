@@ -7,15 +7,13 @@ import EmailVerify from './pages/EmailVerify';
 import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
-import { CartProvider } from './context/CartContext';  // <-- Import ajouté
+import { CartProvider } from './context/CartContext';
+
 import axios from 'axios';
-import Checkout from './pages/Checkout';
-import AdminOrders from './pages/AdminOrders';
-
-
 
 const App = () => {
   const { backendUrl, setIsLoggedIn, setUserData, isLoggedIn } = useContext(AppContent);
@@ -54,13 +52,16 @@ const App = () => {
   return (
     <>
       <ToastContainer />
-      <CartProvider> {/* <-- On entoure Routes pour fournir le contexte panier partout */}
+      <CartProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/email-verify" element={<EmailVerify />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+
+          {/* 🛠️ Dashboard Admin et ses sous-routes */}
           <Route
             path="/admin/*"
             element={
@@ -69,9 +70,6 @@ const App = () => {
               </RequireAuth>
             }
           />
-          <Route path="/checkout" element={<Checkout />} />
-<Route path="/admin/orders" element={<AdminOrders />} />
-
         </Routes>
       </CartProvider>
     </>

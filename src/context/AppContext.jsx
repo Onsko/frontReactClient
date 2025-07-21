@@ -11,20 +11,24 @@ export const AppContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
 
-  const getUserData = async () => {
-    try {
-      const { data } = await axios.get(`${backendUrl}/api/user/data`);
-      if (data.success) {
-        setUserData(data.user);  // Assure-toi que c’est bien "user" côté backend
-      } else {
-        setUserData(null);
-        toast.error(data.message || "Erreur lors de la récupération des données utilisateur");
-      }
-    } catch (error) {
+const getUserData = async () => {
+  try {
+    const { data } = await axios.get(`${backendUrl}/api/user/data`, {
+      withCredentials: true, // ✅ INDISPENSABLE pour que le JWT soit envoyé
+    });
+
+    if (data.success) {
+      setUserData(data.user); // ✅ Doit correspondre au backend (res.json({ success: true, user }))
+    } else {
       setUserData(null);
-      toast.error(error.message || "Erreur inconnue lors de la récupération des données utilisateur");
+      toast.error(data.message || "Erreur lors de la récupération des données utilisateur");
     }
-  };
+  } catch (error) {
+    setUserData(null);
+    toast.error(error.message || "Erreur inconnue lors de la récupération des données utilisateur");
+  }
+};
+
 
   const getAuthState = async () => {
     try {

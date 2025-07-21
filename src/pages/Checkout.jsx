@@ -1,4 +1,3 @@
-// src/pages/Checkout.jsx
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
@@ -16,11 +15,13 @@ const Checkout = () => {
     phone: '',
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Vérification de base
@@ -28,12 +29,49 @@ const Checkout = () => {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-// call the api to add the order on the db
 
-    // ✅ Traitement fictif de commande ici
-    toast.success("Commande passée avec succès !");
-    clearCart();
-    navigate('/');
+    if (cartItems.length === 0) {
+      toast.error("Votre panier est vide");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Préparation des données à envoyer
+      const orderData = {
+        customerInfo: form,
+        products: cartItems.map(item => ({
+          productId: item._id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        totalPrice,
+      };
+
+      // call the api to add the order on the db **
+      const response = await fetch('http://localhost:4000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // si tu utilises des cookies pour l'authentification
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur lors de la commande");
+      }
+
+      toast.success("Commande passée avec succès !");
+      clearCart();
+      navigate('/');
+    } catch (error) {
+      toast.error(error.message || "Erreur serveur");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,9 +126,10 @@ const Checkout = () => {
 
           <button
             type="submit"
-            className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+            className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded disabled:opacity-50"
+            disabled={loading}
           >
-            Passer la commande
+            {loading ? 'En cours...' : 'Passer la commande'}
           </button>
         </form>
 
