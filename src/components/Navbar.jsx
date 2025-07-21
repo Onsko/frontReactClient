@@ -9,8 +9,8 @@ import axios from 'axios';
 const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedIn } = useContext(AppContent);
-  const { items } = useCart(); // corrigé : nom "items" et pas "cartItems"
-console.log(userData)
+  const { items } = useCart();
+
   // Envoie OTP de vérification email
   const sendVerificationOtp = async () => {
     try {
@@ -52,15 +52,24 @@ console.log(userData)
         <img src={assets.logo} alt="Logo" className="w-28 sm:w-32 cursor-pointer" />
       </Link>
 
-      <div className="flex items-center gap-4">
+      {/* Partie droite : panier + mes commandes + utilisateur */}
+      <div className="flex items-center gap-6">
         {/* Icône panier avec badge */}
-        <Link to="/cart" className="relative text-xl">
+        <Link to="/cart" className="relative text-2xl">
           🛒
           {items && items.length > 0 && (
             <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1 rounded-full">
               {items.length}
             </span>
           )}
+        </Link>
+
+        {/* Bouton Mes commandes à côté du panier */}
+        <Link
+          to="/mes-commandes"
+          className="text-sm font-medium text-gray-700 hover:underline cursor-pointer"
+        >
+          Mes commandes
         </Link>
 
         {/* Utilisateur connecté */}

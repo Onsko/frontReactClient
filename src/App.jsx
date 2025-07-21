@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 
+import MyOrdersPage from './pages/MyOrders.jsx'; // <-- import ajouté
+
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import { CartProvider } from './context/CartContext';
@@ -61,7 +63,17 @@ const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
 
-          {/* 🛠️ Dashboard Admin et ses sous-routes */}
+          {/* Page Mes Commandes, protégée */}
+          <Route
+            path="/mes-commandes"
+            element={
+              <RequireAuth>
+                <MyOrdersPage />
+              </RequireAuth>
+            }
+          />
+
+          {/* Dashboard Admin */}
           <Route
             path="/admin/*"
             element={
