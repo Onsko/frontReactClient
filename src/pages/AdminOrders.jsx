@@ -82,7 +82,9 @@ const AdminOrders = () => {
               <h2 className="text-lg font-semibold">🆔 Commande : {order._id}</h2>
               <p className="text-sm text-gray-600">Date : {new Date(order.createdAt).toLocaleString()}</p>
               <p className="text-sm">Client : {order.userId?.email || 'Non défini'}</p>
-              <p className="text-sm">Total : <strong>{order.totalAmount} DT</strong></p>
+<p className="text-md text-gray-700 mb-1">
+  <span className="font-semibold">Total :</span> {order.totalAmount} DT
+</p>
             </div>
 
             <div className="mb-3">
