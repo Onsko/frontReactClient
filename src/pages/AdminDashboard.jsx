@@ -8,6 +8,8 @@ import AddProduct from '../components/admin/AddProduct';
 import CategoryList from '../components/admin/CategoryList';
 import AddCategory from '../components/admin/AddCategory';
 import AdminOrders from './AdminOrders';
+import AdminPromotion from './AdminPromotion'; // promooooo
+
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -34,6 +36,8 @@ const AdminDashboard = () => {
           <Route path="categories" element={<CategoryList />} />
           <Route path="categories/add" element={<AddCategory />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="/admin/promotions" element={<AdminPromotion />} />
+
         </Routes>
       </div>
     </div>

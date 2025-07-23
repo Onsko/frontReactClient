@@ -1,4 +1,3 @@
-// src/pages/Cart.jsx
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -34,9 +33,19 @@ const Cart = () => {
                   alt={item.name}
                   className="w-24 h-24 rounded object-cover"
                 />
+
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold">{item.name}</h4>
-                  <p className="text-gray-600">{item.price} DT</p>
+
+                  {item.isOnPromotion ? (
+                    <p className="text-gray-600">
+                      <span className="line-through mr-2">{item.originalPrice} DT</span>
+                      <span className="text-red-600 font-bold">{item.price} DT</span>
+                    </p>
+                  ) : (
+                    <p className="text-gray-600">{item.price} DT</p>
+                  )}
+
                   <div className="flex items-center gap-3 mt-2">
                     <button
                       onClick={() => updateQuantity(item._id, item.quantity - 1)}
@@ -68,16 +77,19 @@ const Cart = () => {
                     </button>
                   </div>
                 </div>
+
                 <div>
-                  <strong className="text-lg">{item.price * item.quantity} DT</strong>
+                  <strong className="text-lg">
+                    {(item.price * item.quantity).toFixed(2)} DT
+                  </strong>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Résumé & Actions */}
+          {/* Résumé */}
           <div className="mt-10 border-t pt-6 flex justify-between items-center flex-col sm:flex-row gap-6">
-            <h3 className="text-xl font-bold">Total : {totalPrice} DT</h3>
+            <h3 className="text-xl font-bold">Total : {Number(totalPrice).toFixed(3)} DT</h3>
 
             <div className="flex gap-4">
               <button

@@ -1,4 +1,3 @@
-// src/context/CartContext.jsx
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 const CartContext = createContext();
@@ -21,9 +20,29 @@ function cartReducer(state, action) {
           ),
         };
       } else {
+        const {
+          _id,
+          name,
+          imageUrl,
+          price,
+          originalPrice,
+          isOnPromotion,
+        } = action.payload;
+
         return {
           ...state,
-          items: [...state.items, { ...action.payload, quantity: 1 }],
+          items: [
+            ...state.items,
+            {
+              _id,
+              name,
+              imageUrl,
+              price,
+              originalPrice: originalPrice || price,
+              isOnPromotion: isOnPromotion || false,
+              quantity: 1,
+            },
+          ],
         };
       }
     }
@@ -80,10 +99,10 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  const totalPrice = state.items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const totalPrice = state.items.reduce((acc, item) => {
+    const price = item.price; // déjà mis à jour selon promo lors de l'ajout
+    return acc + price * item.quantity;
+  }, 0).toFixed(2);
 
   return (
     <CartContext.Provider

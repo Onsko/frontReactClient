@@ -16,6 +16,11 @@ const Home = () => {
   const backendUrl = 'http://localhost:4000';
   const { addToCart } = useCart();
 
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts(currentPage);
+  }, [currentPage]);
+
   const fetchCategories = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/categories`);
@@ -29,13 +34,8 @@ const Home = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`${backendUrl}/api/products?page=${page}&limit=8`);
-      if (data && Array.isArray(data.products)) {
-        setProducts(data.products);
-        setTotalPages(data.totalPages || 1);
-      } else {
-        setProducts([]);
-        setTotalPages(1);
-      }
+      setProducts(data.products || []);
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error('Erreur de récupération des produits', error.message);
       setProducts([]);
@@ -51,14 +51,8 @@ const Home = () => {
     } else {
       setNotif(`${product.name} est en rupture de stock ❌`);
     }
-
     setTimeout(() => setNotif(null), 3000);
   };
-
-  useEffect(() => {
-    fetchCategories();
-    fetchProducts(currentPage);
-  }, [currentPage]);
 
   return (
     <div className="bg-[#f9f9f9] text-[#222]">
@@ -76,15 +70,19 @@ const Home = () => {
       </header>
 
       {/* Catégories */}
-      <section className="categories flex flex-wrap justify-center gap-10 my-10 px-4">
-        {categories && categories.length > 0 ? (
+      <section className="flex flex-wrap justify-center gap-10 my-10 px-4">
+        {categories.length > 0 ? (
           categories.map((cat) => (
-            <div key={cat._id} className="category-circle text-center cursor-pointer group">
+            <div
+              key={cat._id}
+              className="text-center cursor-pointer"
+              title={cat.name}
+            >
               <img
-                src={cat.imageUrl ? `${backendUrl}/category-images/${cat.imageUrl}` : "/hhh.png"}
+                src={cat.imageUrl ? `${backendUrl}/category-images/${cat.imageUrl}` : '/hhh.png'}
                 alt={cat.name}
-                onError={(e) => { e.target.src = "/hhh.png"; }}
                 className="w-[120px] h-[120px] object-cover rounded-full"
+                onError={(e) => (e.target.src = '/hhh.png')}
               />
               <p className="mt-2 text-gray-600 text-sm">{cat.name}</p>
             </div>
@@ -95,35 +93,54 @@ const Home = () => {
       </section>
 
       {/* Produits */}
-      <section className="product-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-10">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-10">
         {loading ? (
           <p className="text-center col-span-full">Chargement des produits...</p>
-        ) : products && products.length > 0 ? (
-          products.map((prod, index) => (
+        ) : products.length > 0 ? (
+          products.map((prod) => (
             <div
-              key={index}
-              className="product-card bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-transform duration-300 hover:-translate-y-1 relative"
+              key={prod._id}
+              className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-transform hover:-translate-y-1 relative flex flex-col"
             >
               <img
                 src={prod.imageUrl ? `${backendUrl}/uploads/${prod.imageUrl}` : '/default-product.png'}
                 alt={prod.name}
                 className="w-full h-48 object-cover"
               />
-              {/* Badge rupture */}
+
+              {/* Badge promo */}
+              {prod.isOnPromotion && (
+                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full z-10">
+                  Promo
+                </span>
+              )}
+
+              {/* Badge stock */}
               {prod.stock <= 0 && (
                 <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
                   Rupture de stock
                 </span>
               )}
-              <div className="info p-4">
+
+              <div className="p-4 flex flex-col flex-grow">
                 <h4 className="text-lg font-semibold">{prod.name}</h4>
-                <p className="text-sm text-gray-500">{prod.description}</p>
-                <p className="text-md font-bold mt-2 text-gray-700">{prod.price} DT</p>
+                <p className="text-sm text-gray-500 line-clamp-3">{prod.description}</p>
+
+                {prod.isOnPromotion ? (
+                  <p className="text-md font-bold mt-2 text-red-600">
+                    <span className="line-through mr-2 text-gray-500">
+                      {prod.originalPrice} DT
+                    </span>
+                    {prod.price} DT
+                  </p>
+                ) : (
+                  <p className="text-md font-bold mt-2 text-gray-700">{prod.price} DT</p>
+                )}
 
                 <button
                   onClick={() => handleAddToCart(prod)}
                   disabled={prod.stock <= 0}
-                  className={`mt-3 w-full py-2 rounded transition ${
+                  className={`mt-auto w-full py-2 rounded transition ${
                     prod.stock > 0
                       ? 'bg-black text-white hover:bg-gray-800'
                       : 'bg-gray-400 text-white cursor-not-allowed'
@@ -146,7 +163,9 @@ const Home = () => {
             key={idx}
             onClick={() => setCurrentPage(idx + 1)}
             className={`px-4 py-2 rounded-full ${
-              currentPage === idx + 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'
+              currentPage === idx + 1
+                ? 'bg-black text-white'
+                : 'bg-gray-200 text-gray-700'
             } hover:bg-black hover:text-white transition`}
           >
             {idx + 1}

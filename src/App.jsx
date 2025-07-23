@@ -15,6 +15,8 @@ import MyOrdersPage from './pages/MyOrders.jsx';
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import { CartProvider } from './context/CartContext';
+import AdminPromotion from './pages/AdminPromotion'; // promooooo
+
 
 import axios from 'axios';
 
@@ -63,6 +65,8 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/admin/promotions" element={<AdminPromotion />} />
+
 
           {/* Page Mes Commandes, protégée */}
           <Route
