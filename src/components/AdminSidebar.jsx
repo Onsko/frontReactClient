@@ -49,6 +49,14 @@ const AdminSidebar = () => {
     onClick={() => navigate('/admin/promotions')}
     active={isActive('/admin/promotions')}
   />
+
+  <SidebarButton
+  label="Codes promo"
+  icon={<FolderPlus size={18} />}
+  onClick={() => navigate('/admin/promocodes')}
+  active={isActive('/admin/promocodes')}
+/>
+ 
 </nav>
 
       </div>

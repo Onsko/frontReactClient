@@ -16,6 +16,8 @@ import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import { CartProvider } from './context/CartContext';
 import AdminPromotion from './pages/AdminPromotion'; // promooooo
+import AdminPromoCodes from './pages/AdminPromoCodes'; // ajoute ce import
+
 
 
 import axios from 'axios';
@@ -97,6 +99,15 @@ const App = () => {
               </RequireAuth>
             }
           />
+
+          <Route
+  path="/admin/promocodes"
+  element={
+    <RequireAuth>
+      <AdminPromoCodes />
+    </RequireAuth>
+  }
+/>
         </Routes>
       </CartProvider>
     </>

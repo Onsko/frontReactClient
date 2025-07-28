@@ -99,10 +99,11 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  const totalPrice = state.items.reduce((acc, item) => {
-    const price = item.price; // déjà mis à jour selon promo lors de l'ajout
-    return acc + price * item.quantity;
-  }, 0).toFixed(2);
+ const totalPrice = state.items.reduce((acc, item) => {
+  const price = Number(item.price); // sécurité
+  return acc + price * item.quantity;
+}, 0);
+
 
   return (
     <CartContext.Provider
