@@ -5,11 +5,16 @@ import { AppContent } from '../context/AppContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { FaShoppingCart } from 'react-icons/fa'; // Icône panier
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedIn } = useContext(AppContent);
-  const { items } = useCart();
+  const { cartItems } = useCart(); // ✅ Correction ici
+
+  const totalQuantity = Array.isArray(cartItems)
+    ? cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
 
   // Envoie OTP de vérification email
   const sendVerificationOtp = async () => {
@@ -56,15 +61,15 @@ const Navbar = () => {
       <div className="flex items-center gap-6">
         {/* Icône panier avec badge */}
         <Link to="/cart" className="relative text-2xl">
-          🛒
-          {items && items.length > 0 && (
-            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1 rounded-full">
-              {items.length}
+          <FaShoppingCart className="text-gray-800" />
+          {totalQuantity > 0 && (
+            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+              {totalQuantity}
             </span>
           )}
         </Link>
 
-        {/* Bouton Mes commandes à côté du panier */}
+        {/* Bouton Mes commandes */}
         <Link
           to="/mes-commandes"
           className="text-sm font-medium text-gray-700 hover:underline cursor-pointer"
