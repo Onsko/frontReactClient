@@ -1,3 +1,4 @@
+// AdminSidebar.jsx
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, Users, Package, FolderPlus, ClipboardList } from 'lucide-react';
 
@@ -18,47 +19,44 @@ const AdminSidebar = () => {
           Admin Panel
         </h2>
 
-      <nav className="flex flex-col gap-4">
-  <SidebarButton
-    label="Gestion des utilisateurs"
-    icon={<Users size={18} />}
-    onClick={() => navigate('/admin/users')}
-    active={isActive('/admin/users')}
-  />
-  <SidebarButton
-    label="Gestion des produits"
-    icon={<Package size={18} />}
-    onClick={() => navigate('/admin/products')}
-    active={isActive('/admin/products')}
-  />
-  <SidebarButton
-    label="Gestion des catégories"
-    icon={<FolderPlus size={18} />}
-    onClick={() => navigate('/admin/categories')}
-    active={isActive('/admin/categories')}
-  />
-  <SidebarButton
-    label="Gestion des commandes"
-    icon={<ClipboardList size={18} />}
-    onClick={() => navigate('/admin/orders')}
-    active={isActive('/admin/orders')}
-  />
-  <SidebarButton
-    label="Gestion des promotions"
-    icon={<FolderPlus size={18} />}
-    onClick={() => navigate('/admin/promotions')}
-    active={isActive('/admin/promotions')}
-  />
-
-  <SidebarButton
-  label="Codes promo"
-  icon={<FolderPlus size={18} />}
-  onClick={() => navigate('/admin/promocodes')}
-  active={isActive('/admin/promocodes')}
-/>
- 
-</nav>
-
+        <nav className="flex flex-col gap-4">
+          <SidebarButton
+            label="Gestion des utilisateurs"
+            icon={<Users size={18} />}
+            onClick={() => navigate('/admin/users')}
+            active={isActive('/admin/users')}
+          />
+          <SidebarButton
+            label="Gestion des produits"
+            icon={<Package size={18} />}
+            onClick={() => navigate('/admin/products')}
+            active={isActive('/admin/products')}
+          />
+          <SidebarButton
+            label="Gestion des catégories"
+            icon={<FolderPlus size={18} />}
+            onClick={() => navigate('/admin/categories')}
+            active={isActive('/admin/categories')}
+          />
+          <SidebarButton
+            label="Gestion des commandes"
+            icon={<ClipboardList size={18} />}
+            onClick={() => navigate('/admin/orders')}
+            active={isActive('/admin/orders')}
+          />
+          <SidebarButton
+            label="Gestion des promotions"
+            icon={<FolderPlus size={18} />}
+            onClick={() => navigate('/admin/promotions')}
+            active={isActive('/admin/promotions')}
+          />
+          <SidebarButton
+            label="Codes promo"
+            icon={<FolderPlus size={18} />}
+            onClick={() => navigate('/admin/promocodes')}
+            active={isActive('/admin/promocodes')}
+          />
+        </nav>
       </div>
 
       <div>

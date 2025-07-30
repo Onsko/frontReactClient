@@ -1,3 +1,4 @@
+// AdminDashboard.jsx
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
@@ -8,8 +9,8 @@ import AddProduct from '../components/admin/AddProduct';
 import CategoryList from '../components/admin/CategoryList';
 import AddCategory from '../components/admin/AddCategory';
 import AdminOrders from './AdminOrders';
-import AdminPromotion from './AdminPromotion'; // promooooo
-
+import AdminPromotion from './AdminPromotion';
+import AdminPromoCodes from './AdminPromoCodes'; // <-- ajoute ce composant
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -36,8 +37,8 @@ const AdminDashboard = () => {
           <Route path="categories" element={<CategoryList />} />
           <Route path="categories/add" element={<AddCategory />} />
           <Route path="orders" element={<AdminOrders />} />
-          <Route path="/admin/promotions" element={<AdminPromotion />} />
-
+          <Route path="promotions" element={<AdminPromotion />} />
+          <Route path="promocodes" element={<AdminPromoCodes />} /> {/* Ajout codes promo */}
         </Routes>
       </div>
     </div>

@@ -15,10 +15,6 @@ import MyOrdersPage from './pages/MyOrders.jsx';
 import { ToastContainer } from 'react-toastify';
 import { AppContent } from './context/AppContext';
 import { CartProvider } from './context/CartContext';
-import AdminPromotion from './pages/AdminPromotion'; // promooooo
-import AdminPromoCodes from './pages/AdminPromoCodes'; // ajoute ce import
-
-
 
 import axios from 'axios';
 
@@ -67,10 +63,8 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin/promotions" element={<AdminPromotion />} />
 
-
-          {/* Page Mes Commandes, protégée */}
+          {/* Page Mes Commandes protégée */}
           <Route
             path="/mes-commandes"
             element={
@@ -80,7 +74,7 @@ const App = () => {
             }
           />
 
-          {/* Dashboard Admin général */}
+          {/* Dashboard Admin général et toutes ses sous-routes */}
           <Route
             path="/admin/*"
             element={
@@ -90,7 +84,7 @@ const App = () => {
             }
           />
 
-          {/* Édition catégorie (route hors AdminDashboard) */}
+          {/* Édition catégorie (optionnel hors Dashboard) */}
           <Route
             path="/admin/categories/edit/:id"
             element={
@@ -99,15 +93,6 @@ const App = () => {
               </RequireAuth>
             }
           />
-
-          <Route
-  path="/admin/promocodes"
-  element={
-    <RequireAuth>
-      <AdminPromoCodes />
-    </RequireAuth>
-  }
-/>
         </Routes>
       </CartProvider>
     </>

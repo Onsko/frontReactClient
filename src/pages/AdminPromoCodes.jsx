@@ -108,39 +108,56 @@ const AdminPromoCodes = () => {
       <div>
         <h2 className="text-xl font-bold mb-4">Liste des codes promo</h2>
         <table className="w-full table-auto border text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2">Code</th>
-              <th>Montant</th>
-              <th>% ?</th>
-              <th>Validité</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {promoCodes.map((promo) => (
-              <tr key={promo._id} className="text-center border-t">
-                <td className="p-2 font-mono">{promo.code}</td>
-                <td>{promo.discountAmount}</td>
-                <td>{promo.isPercentage ? '✅' : '❌'}</td>
-                <td>
-                  {new Date(promo.validFrom).toLocaleDateString()} →<br />
-                  {new Date(promo.validUntil).toLocaleDateString()}
-                </td>
-                <td>{promo.isActive ? "🟢 Actif" : "🔴 Inactif"}</td>
-                <td className="space-x-2">
-                  <button onClick={() => handleToggle(promo._id)} className="text-blue-600 hover:underline">Activer/Désactiver</button>
-                  <button onClick={() => handleDelete(promo._id)} className="text-red-600 hover:underline">Supprimer</button>
-                </td>
-              </tr>
+         <thead className="bg-gray-100">
+  <tr>
+    <th className="p-2">Code</th>
+    <th>Montant</th>
+    <th>% ?</th>
+    <th>Validité</th>
+    <th>Statut</th>
+    <th>Utilisé par</th> {/* ✅ nouvelle colonne */}
+    <th>Actions</th>
+  </tr>
+</thead>
+<tbody>
+  {promoCodes.map((promo) => (
+    <tr key={promo._id} className="text-center border-t">
+      <td className="p-2 font-mono">{promo.code}</td>
+      <td>{promo.discountAmount}</td>
+      <td>{promo.isPercentage ? '✅' : '❌'}</td>
+      <td>
+        {new Date(promo.validFrom).toLocaleDateString()} →<br />
+        {new Date(promo.validUntil).toLocaleDateString()}
+      </td>
+      <td>{promo.isActive ? "🟢 Actif" : "🔴 Inactif"}</td>
+
+      {/* ✅ Liste des utilisateurs */}
+      <td className="text-left text-xs max-w-xs overflow-auto">
+        {promo.usedBy && promo.usedBy.length > 0 ? (
+          <ul className="list-disc list-inside space-y-1">
+            {promo.usedBy.map((user, idx) => (
+              <li key={idx}>
+                {user.name || user.email}
+              </li>
             ))}
-            {promoCodes.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center py-4">Aucun code promo pour le moment.</td>
-              </tr>
-            )}
-          </tbody>
+          </ul>
+        ) : (
+          <span className="italic text-gray-400">Aucun</span>
+        )}
+      </td>
+
+      <td className="space-x-2">
+        <button onClick={() => handleToggle(promo._id)} className="text-blue-600 hover:underline">
+          Activer/Désactiver
+        </button>
+        <button onClick={() => handleDelete(promo._id)} className="text-red-600 hover:underline">
+          Supprimer
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       </div>
     </div>

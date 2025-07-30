@@ -16,13 +16,17 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) =>
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const applyPromoCode = async () => {
     try {
       const res = await fetch('http://localhost:4000/api/promocodes/validate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // ✅ pour envoyer le cookie token
         body: JSON.stringify({ code: promoCode }),
       });
 
@@ -43,7 +47,6 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation simple
     if (!form.name || !form.address || !form.city || !form.postalCode || !form.phone) {
       toast.error("Tous les champs sont requis");
       return;
@@ -53,7 +56,6 @@ const Checkout = () => {
       return;
     }
 
-    // Vérifier que chaque produit a les données nécessaires
     for (const p of cartItems) {
       if (!p._id || !p.name || !p.quantity || !p.price) {
         toast.error("Un produit du panier est invalide");
@@ -71,7 +73,6 @@ const Checkout = () => {
 
     const totalAfterDiscount = Math.max(0, totalPrice - discount);
 
-    // Construction de l'objet orderData conforme au backend
     const orderData = {
       customerInfo: form,
       products: cartItems.map(item => ({
@@ -80,24 +81,23 @@ const Checkout = () => {
         quantity: item.quantity,
         price: item.price,
       })),
-      totalAmount: totalAfterDiscount,    // correspond à totalAmount dans ton schéma Mongoose
+      totalAmount: totalAfterDiscount,
       promoCode: promo?.code || null,
     };
-
-    console.log('Commande envoyée au backend:', orderData);
 
     try {
       const res = await fetch('http://localhost:4000/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // ✅ cookie token
         body: JSON.stringify(orderData),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        // Affiche l'erreur précise retournée par le backend
         throw new Error(data.message || 'Erreur lors de la création de la commande');
       }
 
@@ -112,7 +112,6 @@ const Checkout = () => {
     }
   };
 
-  // Calcul pour affichage
   const discount = promo
     ? promo.isPercentage
       ? (totalPrice * promo.discountAmount) / 100
